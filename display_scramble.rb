@@ -1,18 +1,25 @@
 require 'shoes'
 require 'scramble.rb'
-WIDTH = 120
 
+
+WIDTH = 120
+GAP = 5
+ 
 UP = 0
 FRONT = 1
 DOWN = 2
 BACK = 3
 RIGHT = 4
 LEFT = 5
+def menu() 
 
+end 
 def main()
 	Shoes.app do
 		scrambler = Scramble.new() 
 		scramble = scrambler.scramble_three_by_three() 
+		
+		background rosybrown
 
 		u  = Array.new(9, white) 
 		f = Array.new(9, green) 
@@ -21,18 +28,46 @@ def main()
 		r = Array.new(9, red) 
 		l = Array.new(9, orange) 	
 		cube = [u, f, d, b, r, l] 
-		para scramble 
-		
-		do_scramble(cube, scramble) 
+		@p = para scramble
+		button "new scramble" do 
+			reset(cube) 
+			scramble = scrambler.scramble_three_by_three() 
+			do_scramble(cube, scramble) 
+			blit() 
+			@p.replace(scramble)
+			draw(cube) 	
+		end
 	
-		side333(WIDTH, 0, u) 
-		side333(WIDTH, WIDTH, f)
-		side333(2 * WIDTH, WIDTH, r)
-		side333(3 * WIDTH, WIDTH, b)
-		side333(WIDTH, 2 * WIDTH, d) 
-		side333(0, WIDTH, l)
+		do_scramble(cube, scramble) 
+		draw(cube) 
 	end
 end
+def reset(cube) 
+	cube[UP] = Array.new(9, white) 
+	cube[FRONT] = Array.new(9, green) 
+	cube[DOWN] = Array.new(9, blue) 
+	cube[BACK] = Array.new(9, yellow) 
+	cube[RIGHT] = Array.new(9, red) 
+	cube[LEFT] = Array.new(9, orange)
+end 
+def draw(cube) 
+	side333(WIDTH + GAP, 0, cube[UP]) 
+	side333(WIDTH + GAP, WIDTH + GAP, cube[FRONT])	
+	side333(2 * (WIDTH + GAP), WIDTH + GAP, cube[RIGHT])
+	side333(3 * (WIDTH + GAP), WIDTH + GAP, cube[BACK])		
+	side333(WIDTH + GAP, 2 * (WIDTH + GAP), cube[DOWN]) 
+	side333(0, WIDTH, cube[LEFT])
+end
+def blit 
+	fill rosybrown 
+	stroke rosybrown
+	rect( 
+		top: 25, 
+		left: 0, 
+		width:1024
+	)
+	stroke black
+end 
 def do_scramble(cube, scramble) 
 	for i in 0..19
 		num = 0
@@ -58,66 +93,9 @@ def do_scramble(cube, scramble)
 				L_turn(cube, num) 
 			when "R"
 				R_turn(cube, num)
-			puts scramble[i * 3]
 		end 			
 	end
 end 
-def t_perm(cube) 
-	sexy(cube) 
-	R_turn(cube, 3) 
-	F_turn(cube, 1) 
-	R_turn(cube, 2) 
-	U_turn(cube, 3) 
-	R_turn(cube, 3) 
-	U_turn(cube, 3) 
-	R_turn(cube, 1) 
-	U_turn(cube, 1) 
-	R_turn(cube, 3) 
-	F_turn(cube, 3) 
-end 
-
-def sexy(cube) 
-	R_turn(cube, 1) 
-	U_turn(cube, 1) 
-	R_turn(cube, 3) 
-	U_turn(cube, 3) 
-end 
-def down_sune(cube) 
-	R_turn(cube, 1) 
-	D_turn(cube, 1) 
-	R_turn(cube, 3) 
-	D_turn(cube, 1) 
-	R_turn(cube, 1) 
-	D_turn(cube, 2) 
-	R_turn(cube, 3) 
-end 	
-def back_sune(cube) 
-	L_turn(cube, 1) 
-	U_turn(cube, 1) 
-	L_turn(cube, 3) 
-	U_turn(cube, 1) 
-	L_turn(cube, 1) 
-	U_turn(cube, 2) 
-	L_turn(cube, 3) 
-end
-def sune(cube) 
-
-	R_turn(cube, 1) 
-	U_turn(cube, 1) 
-	R_turn(cube, 3) 
-	U_turn(cube, 1) 
-	R_turn(cube, 1)
-	U_turn(cube, 2) 
-	R_turn(cube, 3)
-end 
-def checker(cube) 
-	R_turn(cube, 2) 
-	L_turn(cube, 2) 	
-	U_turn(cube, 2) 
-	D_turn(cube, 2)
-	F_turn(cube, 2)
-	B_turn(cube, 2)
-end
 def make_temp(cube, side, indices) 
 	temp = Array.new()
 	for i in indices 
@@ -179,19 +157,10 @@ end
 def F_turn(cube, numTurns) 
 	for i in 1..numTurns
 		temp = [cube[UP][2], cube[UP][5], cube[UP][8]]
-		cube[UP][2] = cube[LEFT][8]
-		cube[UP][5] = cube[LEFT][7] 
-		cube[UP][8] = cube[LEFT][6]		
-
-		cube[LEFT][8] = cube[DOWN][6] 
-		cube[LEFT][7] = cube[DOWN][3]
-		cube[LEFT][6] = cube[DOWN][0]
-		
-		cube[DOWN][6] = cube[RIGHT][0] 
-		cube[DOWN][3] = cube[RIGHT][1]
-		cube[DOWN][0] =	cube[RIGHT][2] 
-		
 		for i in 0..2
+			cube[UP][2 + (3 * i)] = cube[LEFT][8 - i]
+			cube[LEFT][8 - i] = cube[DOWN][(2 - i) * 3]
+			cube[DOWN][(2 - i) * 3] = cube[RIGHT][i]
 			cube[RIGHT][i] = temp[i]
 		end 
 		rotate_face(cube[FRONT])
@@ -233,7 +202,6 @@ def rotate_face(face)
 	face[7] = temp[3] 
 	face[5] = temp[7]
 end 
-
 def side333(left, top, colors) 
 	piece_width = WIDTH / 3
 	for i in 1..3

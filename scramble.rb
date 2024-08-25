@@ -1,12 +1,14 @@
 class Scramble
 	CUBE_SIDES = ['D', 'L', 'B', 'F', 'R', 'U'] 
-	CUBE_TURNS = ["", '2', '\''] 
+	CUBE_TURNS = [' ', '\'', '2'] 
 	
 	MEGAMINX_SIDES = ['R', 'D'] 
 	MEGAMINX_TURNS = ["++", "--"]
+	
 	def initialize 
 		@prng = Random.new()
 	end 
+	
 	def print_menu() 
 		puts "Choose a scramble to generate" 
 		puts "[2] 2x2"
@@ -25,6 +27,7 @@ class Scramble
 	end  
 	def scramble_three_by_three() 
 		last = 6
+		scrmbl = String.new() 
 		for i in 1..20 do
 			current = @prng.rand(6)
 			while current == last || current + last == 5 do
@@ -32,10 +35,11 @@ class Scramble
 			end 
 
 			last = current
-			print CUBE_SIDES.at(current)
-			print CUBE_TURNS.at(@prng.rand(3))
-			print " "
-		end 
+			scrmbl += (CUBE_SIDES.at(current))
+			scrmbl += (CUBE_TURNS.at(@prng.rand(3)))
+			scrmbl += " "	
+		end
+		return scrmbl 
 	end
 	def scramble_megaminx() 
 		for i in 1..7 
@@ -53,5 +57,3 @@ class Scramble
 		end		
 	end 
 end
-scrmblo = Scramble.new
-scrmblo.scramble_megaminx()

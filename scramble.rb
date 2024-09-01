@@ -8,7 +8,7 @@ class Scramble
 	def initialize 
 		@prng = Random.new()
 	end 
-	
+		
 	def print_menu() 
 		puts "Choose a scramble to generate" 
 		puts "[2] 2x2"
@@ -41,6 +41,45 @@ class Scramble
 		end
 		return scrmbl 
 	end
+	def scramble_NNN(layers, num_turns) 
+		layer_names = Array.new() 
+		max_turn = layers / 2 
+		for side in CUBE_SIDES
+			for num in 1...max_turn
+				if num == 1 
+					str = side
+				elsif num == 2
+					str = side + "w"
+				else 
+					str = num.to_s + side + "w"
+				end 
+				layer_names.push(str) 
+			end 
+		end 
+		if max_turn > 2
+			layer_names.insert((max_turn * 3) - 1, max_turn.to_s + "Fw") 
+			layer_names.push(max_turn.to_s + "Rw") 
+			layer_names.push(max_turn.to_s + "Uw") 
+			if layers % 2 == 1 
+				layer_names.push(max_turn.to_s + "Lw")
+				layer_names.push(max_turn.to_s + "Dw") 
+				layer_names.push(max_turn.to_s + "Bw") 
+			end 
+		elsif layers >= 4 
+			layer_names.push("Rw") 
+			layer_names.push("Uw") 
+			layer_names.push("Fw")
+			if layers % 2 == 1 
+				layer_names.push("Lw") 
+				layer_names.push("Dw") 
+				layer_names.push("Bw") 
+			end 
+		end 
+		
+		for nam in layer_names 
+			puts nam
+		end  
+	end 
 	def scramble_megaminx() 
 		for i in 1..7 
 			for j in 1..10 
@@ -57,3 +96,9 @@ class Scramble
 		end		
 	end 
 end
+
+def main() 
+	scrmbl = Scramble.new() 
+	scrmbl.scramble_NNN(6, 70)
+end
+main() 

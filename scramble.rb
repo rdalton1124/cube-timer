@@ -75,10 +75,6 @@ class Scramble
 				layer_names.push("Bw") 
 			end 
 		end 
-		
-		for nam in layer_names 
-			puts nam
-		end  
 	end 
 	def scramble_megaminx() 
 		for i in 1..7 

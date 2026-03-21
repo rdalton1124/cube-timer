@@ -11,6 +11,7 @@ DOWN = 2
 BACK = 3
 RIGHT = 4
 LEFT = 5
+
 def menu() 
 
 end 
@@ -38,25 +39,26 @@ def main()
 			draw(cube) 	
 		end
 	
-		do_scramble(cube, scramble) 
+		do_scramble(cube, scramble)
 		draw(cube) 
 	end
 end
-def reset(cube) 
-	cube[UP] = Array.new(9, white) 
-	cube[FRONT] = Array.new(9, green) 
-	cube[DOWN] = Array.new(9, blue) 
-	cube[BACK] = Array.new(9, yellow) 
-	cube[RIGHT] = Array.new(9, red) 
-	cube[LEFT] = Array.new(9, orange)
+def reset(cube, numLayers=3) 
+	size = numLayers * numLayers
+	cube[UP] = Array.new(size, white) 
+	cube[FRONT] = Array.new(size, green) 
+	cube[DOWN] = Array.new(size, blue) 
+	cube[BACK] = Array.new(size, yellow) 
+	cube[RIGHT] = Array.new(size, red) 
+	cube[LEFT] = Array.new(size, orange)
 end 
-def draw(cube) 
-	side333(WIDTH + GAP, 0, cube[UP]) 
-	side333(WIDTH + GAP, WIDTH + GAP, cube[FRONT])	
-	side333(2 * (WIDTH + GAP), WIDTH + GAP, cube[RIGHT])
-	side333(3 * (WIDTH + GAP), WIDTH + GAP, cube[BACK])		
-	side333(WIDTH + GAP, 2 * (WIDTH + GAP), cube[DOWN]) 
-	side333(0, WIDTH, cube[LEFT])
+def draw(cube, numLayers=3) 
+	draw_side(WIDTH + GAP, 0, cube[UP], numLayers) 
+	draw_side(WIDTH + GAP, WIDTH + GAP, cube[FRONT], numLayers)	
+	draw_side(2 * (WIDTH + GAP), WIDTH + GAP, cube[RIGHT], numLayers)
+	draw_side(3 * (WIDTH + GAP), WIDTH + GAP, cube[BACK], numLayers)		
+	draw_side(WIDTH + GAP, 2 * (WIDTH + GAP), cube[DOWN], numLayers) 
+	draw_side(0, WIDTH, cube[LEFT], numLayers)
 end
 def blit 
 	fill rosybrown 
@@ -68,8 +70,8 @@ def blit
 	)
 	stroke black
 end 
-def do_scramble(cube, scramble) 
-	for i in 0..19
+def do_scramble(cube, scramble, numLayers=3, numTurns=20) 
+	for i in 0...numTurns
 		num = 0
 		
 		case scramble[(i * 3) + 1] 
@@ -82,17 +84,17 @@ def do_scramble(cube, scramble)
 		end 	
 		case scramble[i * 3]
 			when "U" 
-				U_turn(cube, num)
+				U_turn(cube, num, numLayers)
 			when "D"
-				D_turn(cube, num)
+				D_turn(cube, num, numLayers)
 			when "F" 
-				F_turn(cube, num)
+				F_turn(cube, num, numLayers)
 			when "B"
-				B_turn(cube, num)
+				B_turn(cube, num, numLayers)
 			when "L"
-				L_turn(cube, num) 
+				L_turn(cube, num, numLayers) 
 			when "R"
-				R_turn(cube, num)
+				R_turn(cube, num, numLayers)
 		end 			
 	end
 end 
@@ -117,7 +119,7 @@ def turn(cube, indices, faces)
 		cube[faces[3]][indices[i]] = temp[i]
 	end
 end
-def L_turn(cube, numTurns) 
+def L_turn(cube, numTurns=1, numLayers=3) 
 	for i in 1..numTurns
 		temp = [cube[UP][0], cube[UP][1], cube[UP][2]]
 		for j in 0..2 
@@ -129,7 +131,7 @@ def L_turn(cube, numTurns)
 		rotate_face(cube[LEFT])
 	end
 end 
-def R_turn(cube, numTurns) 
+def R_turn(cube, numTurns=1, numLayers=3) 
 	for i in 1..numTurns
 		temp = [cube[UP][6], cube[UP][7], cube[UP][8]]
  
@@ -140,21 +142,30 @@ def R_turn(cube, numTurns)
 			cube[BACK][8 - j] = temp[j - 6]
 		end 
 		rotate_face(cube[RIGHT]) 
-	end
+	end	
 end 
-def U_turn(cube, numTurns) 
+
+def U_turn(cube, numTurns=1, numLayers=3)
+	indices = Array.new 
+	for l in 0...numLayers 
+		indices.push(l * numLayers) 
+	end 
 	for i in 1..numTurns
-		turn(cube, [0, 3, 6], [FRONT, RIGHT, BACK, LEFT])
+		turn(cube, indices, [FRONT, RIGHT, BACK, LEFT])
 		rotate_face(cube[UP])
 	end
 end 
-def D_turn(cube, numTurns) 
+def D_turn(cube, numTurns=1, numLayers=3) 
+	indices = Array.new
+	for l in 1..numLayers
+		indices.push((l * numLayers) - 1)
+	end 
 	for i in 1..numTurns
-		turn(cube, [2, 5, 8], [FRONT, LEFT, BACK, RIGHT])
+		turn(cube, indices, [FRONT, LEFT, BACK, RIGHT])
 		rotate_face(cube[DOWN]) 
 	end 
 end 
-def F_turn(cube, numTurns) 
+def F_turn(cube, numTurns=1, numLayers=3) 
 	for i in 1..numTurns
 		temp = [cube[UP][2], cube[UP][5], cube[UP][8]]
 		for i in 0..2
@@ -166,23 +177,19 @@ def F_turn(cube, numTurns)
 		rotate_face(cube[FRONT])
 	end 
 end 
-def B_turn(cube, numTurns) 
-	for i in 1..numTurns
-		temp = [cube[UP][0], cube[UP][3], cube[UP][6]]
-		
-		cube[UP][0] = cube[RIGHT][6] 
-		cube[UP][3] = cube[RIGHT][7] 
-		cube[UP][6] = cube[RIGHT][8] 
-
-		cube[RIGHT][6] = cube[DOWN][8]
-		cube[RIGHT][7] = cube[DOWN][5] 
-		cube[RIGHT][8] = cube[DOWN][2] 
-		
-		cube[DOWN][8] = cube[LEFT][2] 
-		cube[DOWN][5] = cube[LEFT][1]
-		cube[DOWN][2] = cube[LEFT][0]
-		for i in 0..2
-			cube[LEFT][i] = temp[2 - i] 
+def B_turn(cube, numTurns=1, numLayers=3) 
+	temp = Array.new
+	last = (numLayers * numLayers) - 1
+	alm = ((numLayers) * (numLayers - 1))
+	for t in 1..numTurns
+		for l in 0..2
+			temp.push((cube[UP][numLayers * l]))
+		end 
+		for j in 0..2
+			cube[UP][numLayers * j] = cube[RIGHT][alm + j]
+			cube[RIGHT][alm + j] = cube[DOWN][(last - (numLayers * j))]
+			cube[DOWN][(last - (numLayers * j))] = cube[LEFT][((numLayers - 1) - j)]
+			cube[LEFT][((numLayers - 1) - j)] = temp[j]
 		end 
 		rotate_face(cube[BACK])
 	end 
@@ -202,15 +209,15 @@ def rotate_face(face)
 	face[7] = temp[3] 
 	face[5] = temp[7]
 end 
-def side333(left, top, colors) 
-	piece_width = WIDTH / 3
-	for i in 1..3
-		for j in 1..3 
-			if(colors[4] == blue) 
-				fill colors[(i - 1) * 3 + (j - 1)]
-			else
-				fill colors[(i - 1) * 3 + (j - 1)] 
-			end
+def draw_side(left, top, colors, numLayers=3) 
+	piece_width = WIDTH / numLayers
+	for i in 1..numLayers
+		for j in 1..numLayers 
+			'''if(colors[4] == blue) 
+				fill colors[(i - 1) * numLayers + (j - 1)]
+			else'''
+				fill colors[(i - 1) * numLayers + (j - 1)] 
+			'''end'''
 			rect(
 				left: left + piece_width * i, 
 				top: top + piece_width * j, 
@@ -219,4 +226,5 @@ def side333(left, top, colors)
 		end 
 	end 
 end 
-main()
+
+main() 
